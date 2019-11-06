@@ -3,6 +3,7 @@ numpy
 pandas
 wget
 opencv-python
+pillow
 librosa
 seaborn
 tqdm
