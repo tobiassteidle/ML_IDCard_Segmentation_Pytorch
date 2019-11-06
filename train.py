@@ -61,9 +61,9 @@ def main():
 
     checkpoint = ModelCheckpoint('weights/', monitor=[dice_coef], verbose=1, save_best_only=True, mode='max')
     tensorboard = TensorBoard(log_dir='./logs')
-    earlystopping = EarlyStopping(monitor=[dice_coef], verbose=1, min_delta=0.01, patience=3, mode='max')
+    earlystopping = EarlyStopping(monitor=dice_coef, verbose=1, min_delta=0.01, patience=3, mode='max')
 
-    callbacks_list = [earlystopping]
+    callbacks_list = [checkpoint, tensorboard, earlystopping]
 
     results = model.fit_generator(train_generator, epochs=NO_OF_EPOCHS,
                               steps_per_epoch=(NO_OF_TRAINING_IMAGES // BATCH_SIZE),
