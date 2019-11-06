@@ -4,6 +4,7 @@ pandas
 wget
 opencv-python
 pillow
+scikit-image
 librosa
 seaborn
 tqdm
