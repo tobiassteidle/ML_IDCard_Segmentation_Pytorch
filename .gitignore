@@ -115,4 +115,6 @@ submission.csv
 submission_test.csv
 
 dataset/data
-dataset/images
+dataset/temp
+dataset/train
+
