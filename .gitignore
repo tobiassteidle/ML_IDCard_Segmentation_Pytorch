@@ -110,9 +110,7 @@ backup/
 # IntelliJ
 .idea
 
-# Submission (TEMP)
-submission.csv
-submission_test.csv
+weights/
 
 dataset/data
 dataset/temp
