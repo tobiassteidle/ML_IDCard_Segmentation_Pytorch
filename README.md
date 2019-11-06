@@ -28,9 +28,20 @@ python prepare_dataset.py
 python train.py
 ```
 
+### Test the trained model
+```
+python test.py
+```
 
 ### Additional commands
 Starts Tensorboard Visualisation.
 ```
 tensorboard --logdir=logs/
 ```
+
+## Background Information
+
+### Metrics
+The metric used is the [Dice Coefficient (F1 Score)](https://arxiv.org/pdf/1606.04797v1.pdf).
+![Dice F1 Scpore](assets/dice.png "Dice F1 Scpore")
+
