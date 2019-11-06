@@ -104,7 +104,7 @@ def train_validation_split():
         shutil.rmtree(DATA_PATH, ignore_errors=True)
 
     # Create folders to hold images and masks
-    folders = ['train_frames', 'train_masks', 'val_frames', 'val_masks', 'test_frames', 'test_masks']
+    folders = ['train_frames/image', 'train_masks/image', 'val_frames/image', 'val_masks/image', 'test_frames/image', 'test_masks/image']
 
     for folder in folders:
         os.makedirs(DATA_PATH + folder)
@@ -143,8 +143,8 @@ def train_validation_split():
         img = Image.open(TEMP_MASK_PATH + image)
         img.save(DATA_PATH + '/{}'.format(dir_name) + '/' + image)
 
-    frame_folders = [(train_frames, 'train_frames'), (val_frames, 'val_frames'), (test_frames, 'test_frames')]
-    mask_folders = [(train_masks, 'train_masks'), (val_masks, 'val_masks'), (test_masks, 'test_masks')]
+    frame_folders = [(train_frames, 'train_frames/image'), (val_frames, 'val_frames/image'), (test_frames, 'test_frames/image')]
+    mask_folders = [(train_masks, 'train_masks/image'), (val_masks, 'val_masks/image'), (test_masks, 'test_masks/image')]
 
     print('Split images into train, test and validation...')
 
@@ -165,7 +165,6 @@ def main():
     download_and_unzip()
 
     train_validation_split()
-
 
 if __name__ == '__main__':
     main()
