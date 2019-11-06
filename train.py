@@ -1,4 +1,5 @@
 import os
+import time
 from keras import backend as K
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
@@ -15,6 +16,7 @@ NO_OF_EPOCHS = 100
 BATCH_SIZE = 8
 
 IMAGE_SIZE = (256, 256)
+
 
 def dice_coef(y_true, y_pred, smooth=1):
     """
@@ -40,13 +42,16 @@ def main():
     val_datagen = ImageDataGenerator(rescale=1. / 255)
 
     train_image_generator = train_datagen.flow_from_directory('./dataset/train/train_frames',
-                                                              target_size=IMAGE_SIZE, class_mode=None, batch_size=BATCH_SIZE)
+                                                              target_size=IMAGE_SIZE, class_mode=None,
+                                                              batch_size=BATCH_SIZE)
 
     train_mask_generator = train_datagen.flow_from_directory('dataset/train/train_masks',
-                                                             target_size=IMAGE_SIZE, class_mode=None, batch_size=BATCH_SIZE)
+                                                             target_size=IMAGE_SIZE, class_mode=None,
+                                                             batch_size=BATCH_SIZE)
 
     val_image_generator = val_datagen.flow_from_directory('dataset/train/val_frames',
-                                                          target_size=IMAGE_SIZE, class_mode=None, batch_size=BATCH_SIZE)
+                                                          target_size=IMAGE_SIZE, class_mode=None,
+                                                          batch_size=BATCH_SIZE)
 
     val_mask_generator = val_datagen.flow_from_directory('dataset/train/val_masks',
                                                          target_size=IMAGE_SIZE, class_mode=None, batch_size=BATCH_SIZE)
@@ -59,17 +64,19 @@ def main():
     optimizer = Adam(lr=1E-5, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
     model.compile(loss=dice_coef_loss, optimizer=optimizer, metrics=[dice_coef])
 
-    checkpoint = ModelCheckpoint('weights/', monitor=[dice_coef], verbose=1, save_best_only=True, mode='max')
-    tensorboard = TensorBoard(log_dir='./logs')
+    checkpoint = ModelCheckpoint('weights/', monitor=dice_coef, verbose=1, save_best_only=True, mode='max')
+
+    now = time.strftime("%Y%m%d_%H%M%S")
+    tensorboard = TensorBoard(log_dir='./logs/' + now, histogram_freq=0, write_graph=True, write_images=True)
     earlystopping = EarlyStopping(monitor=dice_coef, verbose=1, min_delta=0.01, patience=3, mode='max')
 
     callbacks_list = [checkpoint, tensorboard, earlystopping]
 
     results = model.fit_generator(train_generator, epochs=NO_OF_EPOCHS,
-                              steps_per_epoch=(NO_OF_TRAINING_IMAGES // BATCH_SIZE),
-                              validation_data=val_generator,
-                              validation_steps=(NO_OF_VAL_IMAGES // BATCH_SIZE),
-                              callbacks=callbacks_list)
+                                  steps_per_epoch=(NO_OF_TRAINING_IMAGES // BATCH_SIZE),
+                                  validation_data=val_generator,
+                                  validation_steps=(NO_OF_VAL_IMAGES // BATCH_SIZE),
+                                  callbacks=callbacks_list)
     model.save('Model.h5')
 
 
