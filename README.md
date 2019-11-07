@@ -45,6 +45,6 @@ tensorboard --logdir=logs/
 ## Background Information
 
 ### Metrics
-The metric used is the [Dice Coefficient (F1 Score)](https://arxiv.org/pdf/1606.04797v1.pdf).
-![Dice F1 Scpore](assets/dice.png "Dice F1 Scpore")
+The metric used is the IoU.
+![Dice F1 Scpore](assets/iou.png "IoU")
 
