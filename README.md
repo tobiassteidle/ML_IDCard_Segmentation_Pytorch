@@ -30,8 +30,11 @@ python train.py
 
 ### Test the trained model
 ```
-python test.py
+python test.py test/sample.png --output=test/output.png
 ```
+The `--output` argument is optional, default output file is `prediction.png`.
+
+Call `python test.py --help` for possible arguments. 
 
 ### Additional commands
 Starts Tensorboard Visualisation.
