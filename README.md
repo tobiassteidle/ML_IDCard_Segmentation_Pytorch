@@ -45,6 +45,6 @@ tensorboard --logdir=logs/
 ## Background Information
 
 ### Metrics
-The metric used is the IoU.
+The metric used is the IoU.  
 ![Dice F1 Scpore](assets/iou.png "IoU")
 
