@@ -1,30 +1,22 @@
 import os
 import time
-from keras import backend as K
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ReduceLROnPlateau
 from keras.callbacks import TensorBoard
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
 
+from utils import metrics
 import models
 
 NO_OF_TRAINING_IMAGES = len(os.listdir('dataset/train/train_frames/image'))
 NO_OF_VAL_IMAGES = len(os.listdir('dataset/train/val_frames/image'))
 
-NO_OF_EPOCHS = 100
+NO_OF_EPOCHS = 1000
 BATCH_SIZE = 8
 
 IMAGE_SIZE = (256, 256)
-
-
-def dice_coef(y_true, y_pred, smooth=1):
-    intersection = K.sum(K.abs(y_true * y_pred), axis=-1)
-    return (2. * intersection + smooth) / (K.sum(K.square(y_true), -1) + K.sum(K.square(y_pred), -1) + smooth)
-
-
-def dice_coef_loss(y_true, y_pred):
-    return 1 - dice_coef(y_true, y_pred)
 
 
 def main():
@@ -56,15 +48,15 @@ def main():
 
     # build model
     model = models.UUNET(input_size=(256, 256, 3))
-    optimizer = Adam(lr=1E-5, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-    model.compile(loss=dice_coef_loss, optimizer=optimizer, metrics=[dice_coef])
+    model.compile(optimizer=Adam(lr=1e-3), loss=metrics.IoU, metrics=['binary_accuracy'])
 
     # configure callbacks
-    checkpoint = ModelCheckpoint("model.h5", monitor=dice_coef, verbose=1, save_best_only=True,
-                                 save_weights_only=False, mode='max')
-
-    earlystopping = EarlyStopping(monitor=dice_coef, verbose=1, min_delta=0.01, patience=3,
-                                  mode='max', restore_best_weights=True)
+    checkpoint = ModelCheckpoint("model.h5", verbose=1, save_best_only=True, save_weights_only=False)
+    earlystopping = EarlyStopping(patience=50, verbose=1)
+    reduce_lr = ReduceLROnPlateau(factor = 0.2,
+                              patience = 5,
+                              verbose = 1,
+                              min_delta = 0.000001)
 
     tensorboard = TensorBoard(log_dir='./logs/' + time.strftime("%Y%m%d_%H%M%S"), histogram_freq=0,
                               write_graph=True, write_images=True)
@@ -74,7 +66,7 @@ def main():
                                   steps_per_epoch=(NO_OF_TRAINING_IMAGES // BATCH_SIZE),
                                   validation_data=val_generator,
                                   validation_steps=(NO_OF_VAL_IMAGES // BATCH_SIZE),
-                                  callbacks=[checkpoint, earlystopping, tensorboard])
+                                  callbacks=[checkpoint, earlystopping, reduce_lr, tensorboard])
 
 if __name__ == '__main__':
     main()
