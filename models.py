@@ -3,7 +3,7 @@ from keras.models import *
 from keras.optimizers import *
 
 
-def UUNET(pretrained_weights=None, input_size=(256, 256, 1)):
+def UNET(pretrained_weights=None, input_size=(256, 256, 1)):
     inputs = Input(input_size)
     conv1 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(inputs)
     conv1 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv1)

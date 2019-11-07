@@ -47,7 +47,7 @@ def main():
     val_generator = zip(val_image_generator, val_mask_generator)
 
     # build model
-    model = models.UUNET(input_size=(256, 256, 3))
+    model = models.UNET(input_size=(256, 256, 3))
     model.compile(optimizer=Adam(lr=1e-3), loss=metrics.IoU, metrics=['binary_accuracy'])
 
     # configure callbacks
