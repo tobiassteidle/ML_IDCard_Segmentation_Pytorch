@@ -1,11 +1,11 @@
 import argparse
 import cv2
-import os
 import matplotlib.pyplot as plt
+import os
 from keras.models import load_model
 
-from utils import metrics
 from utils import image
+from utils import metrics
 
 parser = argparse.ArgumentParser(description='Semantic segmentation of IDCard in Image.')
 parser.add_argument('input', type=str, help='Image (with IDCard) Input file')
