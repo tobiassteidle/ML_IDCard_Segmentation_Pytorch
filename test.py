@@ -1,20 +1,23 @@
 import argparse
 import cv2
-import matplotlib.pyplot as plt
 import os
+import matplotlib.pyplot as plt
 from keras.models import load_model
 
 from utils import metrics
+from utils import image
 
 parser = argparse.ArgumentParser(description='Semantic segmentation of IDCard in Image.')
 parser.add_argument('input', type=str, help='Image (with IDCard) Input file')
-parser.add_argument('--output', type=str, default='prediction.png', help='Output file for image')
+parser.add_argument('--output_mask', type=str, default='output_mask.png', help='Output file for mask')
+parser.add_argument('--output_prediction', type=str, default='output_pred.png', help='Output file for image')
 parser.add_argument('--model', type=str, default='model.h5', help='Path to .h5 model file')
 
 args = parser.parse_args()
 
 INPUT_FILE = args.input
-OUTPUT_FILE = args.output
+OUTPUT_MASK = args.output_mask
+OUTPUT_FILE = args.output_prediction
 MODEL_FILE = args.model
 
 
@@ -49,9 +52,13 @@ def main():
             print('Prediction...')
             output_image = predict_image(model, img)
 
-            print('Save output file...', OUTPUT_FILE)
-            output_image = cv2.resize(output_image, (w, h))
-            plt.imsave(OUTPUT_FILE, output_image, cmap='gray')
+            print('Cut it out...')
+            mask_image = cv2.resize(output_image, (w, h))
+            warped = image.four_point_transform(cv2.imread(INPUT_FILE), image.detect_corners(mask_image))
+
+            print('Save output files...', OUTPUT_FILE)
+            plt.imsave(OUTPUT_MASK, mask_image, cmap='gray')
+            plt.imsave(OUTPUT_FILE, warped)
 
             print('Done.')
 

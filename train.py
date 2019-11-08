@@ -1,18 +1,17 @@
-import os
-import time
 import numpy as np
+import os
+import random as rn
+import tensorflow as tf
+import time
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
 from keras.callbacks import ReduceLROnPlateau
 from keras.callbacks import TensorBoard
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
-import tensorflow as tf
-import random as rn
-
-from utils import metrics
 
 import models
+from utils import metrics
 
 NO_OF_TRAINING_IMAGES = len(os.listdir('dataset/train/train_frames/image'))
 NO_OF_VAL_IMAGES = len(os.listdir('dataset/train/val_frames/image'))
@@ -26,6 +25,7 @@ SEED = 230
 rn.seed(SEED)
 np.random.seed(SEED)
 tf.set_random_seed(SEED)
+
 
 def main():
     train_datagen = ImageDataGenerator(rescale=1. / 255)
@@ -66,8 +66,15 @@ def main():
     model.compile(optimizer=Adam(lr=1e-4), loss='binary_crossentropy', metrics=['accuracy', metrics.mean_iou])
 
     # configure callbacks
+    '''
+    checkpoint = ModelCheckpoint("model.h5", verbose=1, save_best_only=True, save_weights_only=False,
+                                 monitor='val_mean_iou', mode='max')
+    earlystopping = EarlyStopping(patience=10, verbose=1, monitor='val_mean_iou', mode='max')
+    '''
+
     checkpoint = ModelCheckpoint("model.h5", verbose=1, save_best_only=True, save_weights_only=False)
     earlystopping = EarlyStopping(patience=10, verbose=1)
+
     reduce_lr = ReduceLROnPlateau(factor=0.2,
                                   patience=3,
                                   verbose=1,
