@@ -17,7 +17,7 @@ import models
 NO_OF_TRAINING_IMAGES = len(os.listdir('dataset/train/train_frames/image'))
 NO_OF_VAL_IMAGES = len(os.listdir('dataset/train/val_frames/image'))
 
-NO_OF_EPOCHS = 1000
+NO_OF_EPOCHS = 100
 BATCH_SIZE = 8
 
 IMAGE_SIZE = (256, 256)
