@@ -1,11 +1,14 @@
 import os
 import time
+import numpy as np
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
 from keras.callbacks import ReduceLROnPlateau
 from keras.callbacks import TensorBoard
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
+import tensorflow as tf
+import random as rn
 
 from utils import metrics
 import models
@@ -18,6 +21,10 @@ BATCH_SIZE = 8
 
 IMAGE_SIZE = (256, 256)
 
+SEED = 42
+rn.seed(SEED)
+np.random.seed(SEED)
+tf.set_random_seed(1234)
 
 def main():
     train_datagen = ImageDataGenerator(rescale=1. / 255)
@@ -25,26 +32,30 @@ def main():
                                                               target_size=IMAGE_SIZE,
                                                               class_mode=None,
                                                               batch_size=BATCH_SIZE,
-                                                              color_mode='grayscale')
+                                                              color_mode='grayscale',
+                                                              seed=SEED)
 
     train_mask_generator = train_datagen.flow_from_directory('dataset/train/train_masks',
                                                              target_size=IMAGE_SIZE,
                                                              class_mode=None,
                                                              batch_size=BATCH_SIZE,
-                                                             color_mode='grayscale')
+                                                             color_mode='grayscale',
+                                                             seed=SEED)
 
     val_datagen = ImageDataGenerator(rescale=1. / 255)
     val_image_generator = val_datagen.flow_from_directory('dataset/train/val_frames',
                                                           target_size=IMAGE_SIZE,
                                                           class_mode=None,
                                                           batch_size=BATCH_SIZE,
-                                                          color_mode='grayscale')
+                                                          color_mode='grayscale',
+                                                          seed=SEED)
 
     val_mask_generator = val_datagen.flow_from_directory('dataset/train/val_masks',
                                                          target_size=IMAGE_SIZE,
                                                          class_mode=None,
                                                          batch_size=BATCH_SIZE,
-                                                         color_mode='grayscale')
+                                                         color_mode='grayscale',
+                                                         seed=SEED)
 
     train_generator = zip(train_image_generator, train_mask_generator)
     val_generator = zip(val_image_generator, val_mask_generator)
