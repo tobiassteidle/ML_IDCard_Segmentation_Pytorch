@@ -1,5 +1,11 @@
 # ML_IDCard_Segmentation (IN WORK)
-Machine Learning Project to identify an ID Card on an image.
+Machine Learning Project to identify an ID Card on an image.  
+
+### Zielsetzung
+The goal of this project is to recognize a ID Card on a photo, punch it out using semantic segmentation and to 
+transform the perspective so that you get a frontal view of the ID Card.
+Optionally an OCR text recognition can be done in a later step.
+However, this is not yet planned in the scope of this project.
 
 ## Additional Information
 Dataset: [MIDV-500](https://arxiv.org/abs/1807.05786)   
@@ -44,7 +50,23 @@ tensorboard --logdir=logs/
 
 ## Background Information
 
+### Model
+A [U-NET](https://arxiv.org/abs/1505.04597) was used as the model.
+U-Net is a convolutional neural network that was developed for biomedical image segmentation at the
+Computer Science Department of the University of Freiburg, Germany.
+The network is based on the fully convolutional networkand its architecture was modified and extended to work with
+fewer training images and to yield more precise segmentations. 
+Segmentation of a 512*512 image takes less than a second on a modern GPU.
+  
+![IoU](assets/unet.jpg "U-Net")
+
 ### Metrics
-The metric used is the IoU.  
-![Dice F1 Scpore](assets/iou.png "IoU")
+The Metric [IoU](https://arxiv.org/abs/1902.09630) (Intersection over Unit / Jaccard-Coefficient) was used
+to measure the quality of the model.
+The closer the Jaccard coefficient is to 1, the greater the similarity of the quantities. The minimum value of the Jaccard coefficient is 0.   
+![IoU](assets/iou_formular1.png "IoU")
+  
+Example:  
+![IoU](assets/iou.png "IoU")
+
 
