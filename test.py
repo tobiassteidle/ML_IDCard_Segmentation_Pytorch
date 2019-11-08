@@ -1,10 +1,8 @@
 import argparse
 import cv2
-import os
 import matplotlib.pyplot as plt
+import os
 from keras.models import load_model
-
-from utils import metrics
 
 parser = argparse.ArgumentParser(description='Semantic segmentation of IDCard in Image.')
 parser.add_argument('input', type=str, help='Image (with IDCard) Input file')
@@ -17,34 +15,44 @@ INPUT_FILE = args.input
 OUTPUT_FILE = args.output
 MODEL_FILE = args.model
 
-if not os.path.isfile(INPUT_FILE):
-    print('Input image not found ', INPUT_FILE)
 
-if not os.path.isfile(MODEL_FILE):
-    print('Model not found ', MODEL_FILE)
-
-print('Load image... ', INPUT_FILE)
-img = cv2.imread(INPUT_FILE)
-h, w = img.shape[:2]
-img = cv2.resize(img, (256, 256))
-#img = img / 255.0
+def load_image():
+    img = cv2.imread(INPUT_FILE, cv2.IMREAD_GRAYSCALE)
+    img = img / 255.0
+    height, width = img.shape[:2]
+    img = cv2.resize(img, (256, 256), interpolation=cv2.INTER_AREA)
+    img = img.reshape(1, 256, 256, 1)
+    return img, height, width
 
 
-
-img = img.reshape(1, 256, 256, 3)
-
-print('Load model... ', MODEL_FILE)
-model = load_model(MODEL_FILE,
-                   custom_objects={'IoU': metrics.IoU})
-
-print('Prediction...')
-predict = model.predict(img, verbose=1)
-
-print(predict.shape)
-
-output_image = predict[0]
-output_image = cv2.resize(output_image, (w,h))
-plt.imsave(OUTPUT_FILE, output_image, cmap='gray')
+def predict_image(model, image):
+    predict = model.predict(image, verbose=1)
+    return predict[0]
 
 
-cv2.imwrite('test/output_cv2.png', output_image)
+def main():
+    if not os.path.isfile(INPUT_FILE):
+        print('Input image not found ', INPUT_FILE)
+    else:
+        if not os.path.isfile(MODEL_FILE):
+            print('Model not found ', MODEL_FILE)
+
+        else:
+            print('Load model... ', MODEL_FILE)
+            model = load_model(MODEL_FILE)
+
+            print('Load image... ', INPUT_FILE)
+            img, h, w = load_image()
+
+            print('Prediction...')
+            output_image = predict_image(model, img)
+
+            print('Save output file...', OUTPUT_FILE)
+            output_image = cv2.resize(output_image, (w, h))
+            plt.imsave(OUTPUT_FILE, output_image, cmap='gray')
+
+            print('Done.')
+
+
+if __name__ == '__main__':
+    main()
