@@ -66,15 +66,9 @@ def main():
     model.compile(optimizer=Adam(lr=1e-4), loss='binary_crossentropy', metrics=['accuracy', metrics.mean_iou])
 
     # configure callbacks
-    '''
     checkpoint = ModelCheckpoint("model.h5", verbose=1, save_best_only=True, save_weights_only=False,
                                  monitor='val_mean_iou', mode='max')
     earlystopping = EarlyStopping(patience=10, verbose=1, monitor='val_mean_iou', mode='max')
-    '''
-
-    checkpoint = ModelCheckpoint("model.h5", verbose=1, save_best_only=True, save_weights_only=False)
-    earlystopping = EarlyStopping(patience=10, verbose=1)
-
     reduce_lr = ReduceLROnPlateau(factor=0.2,
                                   patience=3,
                                   verbose=1,
