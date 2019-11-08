@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import os
 from keras.models import load_model
 
+from utils import metrics
+
 parser = argparse.ArgumentParser(description='Semantic segmentation of IDCard in Image.')
 parser.add_argument('input', type=str, help='Image (with IDCard) Input file')
 parser.add_argument('--output', type=str, default='prediction.png', help='Output file for image')
@@ -39,7 +41,7 @@ def main():
 
         else:
             print('Load model... ', MODEL_FILE)
-            model = load_model(MODEL_FILE)
+            model = load_model(MODEL_FILE, custom_objects={'mean_iou': metrics.mean_iou})
 
             print('Load image... ', INPUT_FILE)
             img, h, w = load_image()

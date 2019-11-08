@@ -11,6 +11,7 @@ import tensorflow as tf
 import random as rn
 
 from utils import metrics
+
 import models
 
 NO_OF_TRAINING_IMAGES = len(os.listdir('dataset/train/train_frames/image'))
@@ -21,10 +22,10 @@ BATCH_SIZE = 8
 
 IMAGE_SIZE = (256, 256)
 
-SEED = 42
+SEED = 230
 rn.seed(SEED)
 np.random.seed(SEED)
-tf.set_random_seed(1234)
+tf.set_random_seed(SEED)
 
 def main():
     train_datagen = ImageDataGenerator(rescale=1. / 255)
