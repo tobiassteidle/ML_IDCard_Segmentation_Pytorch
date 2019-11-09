@@ -1,8 +1,8 @@
-# ML_IDCard_Segmentation (IN WORK)
+# ML_IDCard_Segmentation
 Machine Learning Project to identify an ID Card on an image.  
 
-### Zielsetzung
-The goal of this project is to recognize a ID Card on a photo, punch it out using semantic segmentation and to 
+### Objectives
+The goal of this project is to recognize a ID Card on a photo, cut it out using semantic segmentation and to 
 transform the perspective so that you get a frontal view of the ID Card.
 Optionally an OCR text recognition can be done in a later step.
 However, this is not yet planned in the scope of this project.
@@ -36,9 +36,8 @@ python train.py
 
 ### Test the trained model
 ```
-python test.py test/sample.png --output=test/output.png
+python test.py test/sample.png --output_mask=test/output_mask.png --output_prediction=test/output_pred.png --model=model.h5
 ```
-The `--output` argument is optional, default output file is `prediction.png`.
 
 Call `python test.py --help` for possible arguments. 
 
@@ -68,5 +67,14 @@ The closer the Jaccard coefficient is to 1, the greater the similarity of the qu
   
 Example:  
 ![IoU](assets/iou.png "IoU")
+
+## Results for validation set (only trained on german id cards)
+Accuracy:
+mean_iou: 0.9939 - val_loss: 0.0064 - val_acc: 0.9978 - val_mean_iou: 0.9939
+
+Intersection over Unit:
+
+Pipeline Example:  
+![Pipeline](assets/pipeline.png "Workflow Pipeline")
 
 
