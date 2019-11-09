@@ -69,10 +69,11 @@ Example:
 ![IoU](assets/iou.png "IoU")
 
 ## Results for validation set (only trained on german id cards)
-Accuracy:
-mean_iou: 0.9939 - val_loss: 0.0064 - val_acc: 0.9978 - val_mean_iou: 0.9939
+Accuracy:  
+99.87%
 
-Intersection over Unit:
+Intersection over Unit:  
+0.9939
 
 Pipeline Example:  
 ![Pipeline](assets/pipeline.png "Workflow Pipeline")
