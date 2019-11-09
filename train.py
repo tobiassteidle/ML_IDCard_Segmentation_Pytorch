@@ -9,6 +9,7 @@ from keras.callbacks import ReduceLROnPlateau
 from keras.callbacks import TensorBoard
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
+from keras.models import load_model
 
 import models
 from utils import metrics
@@ -16,7 +17,7 @@ from utils import metrics
 NO_OF_TRAINING_IMAGES = len(os.listdir('dataset/train/train_frames/image'))
 NO_OF_VAL_IMAGES = len(os.listdir('dataset/train/val_frames/image'))
 
-NO_OF_EPOCHS = 100
+NO_OF_EPOCHS = 500
 BATCH_SIZE = 8
 
 IMAGE_SIZE = (256, 256)
@@ -63,16 +64,19 @@ def main():
 
     # build model
     model = models.UNET(input_size=(256, 256, 1))
+
+    # load pretrained
+    #model = load_model("model.h5", custom_objects={'mean_iou': metrics.mean_iou})
+
+
     model.compile(optimizer=Adam(lr=1e-4), loss='binary_crossentropy', metrics=['accuracy', metrics.mean_iou])
 
     # configure callbacks
     checkpoint = ModelCheckpoint("model.h5", verbose=1, save_best_only=True, save_weights_only=False,
                                  monitor='val_mean_iou', mode='max')
     earlystopping = EarlyStopping(patience=10, verbose=1, monitor='val_mean_iou', mode='max')
-    reduce_lr = ReduceLROnPlateau(factor=0.2,
-                                  patience=3,
-                                  verbose=1,
-                                  min_delta=0.000001)
+    reduce_lr = ReduceLROnPlateau(factor=0.2, patience=3, verbose=1, min_delta=0.000001,
+                                  monitor='val_mean_iou', mode='max')
     tensorboard = TensorBoard(log_dir='./logs/' + time.strftime("%Y%m%d_%H%M%S"), histogram_freq=0,
                               write_graph=True, write_images=True)
 
