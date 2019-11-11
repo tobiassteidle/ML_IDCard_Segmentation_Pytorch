@@ -36,7 +36,7 @@ python train.py
 
 ### Test the trained model
 ```
-python test.py test/sample.png --output_mask=test/output_mask.png --output_prediction=test/output_pred.png --model=model.h5
+python test.py test/sample1.png --output_mask=test/output_mask.png --output_prediction=test/output_pred.png --model=model.h5
 ```
 
 Call `python test.py --help` for possible arguments. 

@@ -54,7 +54,7 @@ def main():
 
             print('Cut it out...')
             mask_image = cv2.resize(output_image, (w, h))
-            warped = image.four_point_transform(cv2.imread(INPUT_FILE), image.detect_corners(mask_image))
+            warped = image.convert_object(mask_image, cv2.imread(INPUT_FILE))
 
             print('Save output files...', OUTPUT_FILE)
             plt.imsave(OUTPUT_MASK, mask_image, cmap='gray')

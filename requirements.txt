@@ -4,6 +4,7 @@ pandas
 wget
 opencv-python
 pillow
+imutils
 scikit-image
 librosa
 seaborn
