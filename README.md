@@ -34,6 +34,11 @@ python prepare_dataset.py
 python train.py
 ```
 
+### Show Jupyter Notebook for Test
+```
+jupyter notebook "IDCard Prediction Test.ipynb"
+```
+
 ### Test the trained model
 ```
 python test.py test/sample1.png --output_mask=test/output_mask.png --output_prediction=test/output_pred.png --model=model.h5
