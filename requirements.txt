@@ -1,7 +1,7 @@
 matplotlib
 numpy==1.16.4
 pandas
-wget
+wget==3.0
 opencv-python
 pillow
 imutils

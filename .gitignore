@@ -117,3 +117,5 @@ dataset/temp
 dataset/train
 
 test/output*.png
+
+*.h5
