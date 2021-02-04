@@ -1,39 +1,56 @@
 import argparse
 import cv2
+import numpy as np
+from PIL import Image
 import matplotlib.pyplot as plt
 import os
-from keras.models import load_model
+import pathlib
 
+import torch
+
+import models
 from utils import image
-from utils import metrics
 
 parser = argparse.ArgumentParser(description='Semantic segmentation of IDCard in Image.')
 parser.add_argument('input', type=str, help='Image (with IDCard) Input file')
 parser.add_argument('--output_mask', type=str, default='output_mask.png', help='Output file for mask')
 parser.add_argument('--output_prediction', type=str, default='output_pred.png', help='Output file for image')
-parser.add_argument('--model', type=str, default='model.h5', help='Path to .h5 model file')
+parser.add_argument('--model', type=str, default='./pretrained/model_checkpoint.pt', help='Path to checkpoint file')
 
 args = parser.parse_args()
+#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 
 INPUT_FILE = args.input
 OUTPUT_MASK = args.output_mask
 OUTPUT_FILE = args.output_prediction
 MODEL_FILE = args.model
 
-
 def load_image():
-    img = cv2.imread(INPUT_FILE, cv2.IMREAD_GRAYSCALE)
-    img = img / 255.0
-    height, width = img.shape[:2]
-    img = cv2.resize(img, (256, 256), interpolation=cv2.INTER_AREA)
-    img = img.reshape(1, 256, 256, 1)
-    return img, height, width
+    image = Image.open(INPUT_FILE).convert('L')
+    width, height = image.size
+
+    image = image.resize((256, 256))
+    img_nd = np.array(image)
+
+    if len(img_nd.shape) == 2:
+        img_nd = np.expand_dims(img_nd, axis=2)
+
+    # HWC to CHW
+    img_trans = img_nd.transpose((2, 0, 1))
+    if img_trans.max() > 1:
+        img_trans = img_trans / 255
+
+    img_trans = img_trans.reshape(1, 1, 256, 256)
+
+    return torch.from_numpy(img_trans).type(torch.FloatTensor), height, width
 
 
 def predict_image(model, image):
-    predict = model.predict(image, verbose=1)
-    return predict[0]
+    with torch.no_grad():
+        output = model(image.to(device))
 
+    return output
 
 def main():
     if not os.path.isfile(INPUT_FILE):
@@ -44,13 +61,20 @@ def main():
 
         else:
             print('Load model... ', MODEL_FILE)
-            model = load_model(MODEL_FILE, custom_objects={'mean_iou': metrics.mean_iou})
+            model = models.UNet(n_channels=1, n_classes=1, bilinear=False)
+
+            checkpoint = torch.load(pathlib.Path(MODEL_FILE))
+            model.load_state_dict(checkpoint['model_state_dict'])
+            model.to(device)
+            model.eval()
 
             print('Load image... ', INPUT_FILE)
             img, h, w = load_image()
 
             print('Prediction...')
             output_image = predict_image(model, img)
+
+            print(output_image)
 
             print('Cut it out...')
             mask_image = cv2.resize(output_image, (w, h))
