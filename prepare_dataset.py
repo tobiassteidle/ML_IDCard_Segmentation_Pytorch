@@ -9,7 +9,7 @@ import wget
 import zipfile
 from PIL import Image
 from glob import glob
-
+'''
 download_links = [
     'ftp://smartengines.com/midv-500/dataset/12_deu_drvlic_new.zip',
     'ftp://smartengines.com/midv-500/dataset/13_deu_drvlic_old.zip',
@@ -17,8 +17,8 @@ download_links = [
     'ftp://smartengines.com/midv-500/dataset/15_deu_id_old.zip',
     'ftp://smartengines.com/midv-500/dataset/16_deu_passport_new.zip',
     'ftp://smartengines.com/midv-500/dataset/17_deu_passport_old.zip']
-
 '''
+
 download_links = ['ftp://smartengines.com/midv-500/dataset/01_alb_id.zip',
                   'ftp://smartengines.com/midv-500/dataset/02_aut_drvlic_new.zip',
                   'ftp://smartengines.com/midv-500/dataset/03_aut_id_old.zip',
@@ -69,7 +69,6 @@ download_links = ['ftp://smartengines.com/midv-500/dataset/01_alb_id.zip',
                   'ftp://smartengines.com/midv-500/dataset/48_usa_passportcard.zip',
                   'ftp://smartengines.com/midv-500/dataset/49_usa_ssn82.zip',
                   'ftp://smartengines.com/midv-500/dataset/50_xpo_id.zip']
-'''
 
 PATH_OFFSET = 40
 TARGET_PATH = 'dataset/data/'
@@ -122,10 +121,9 @@ def download_and_unzip():
                 print ('Downloading:', link)
                 wget.download(link, TARGET_PATH)
 
-            else:
-                # Unzip archives
-                with zipfile.ZipFile(full_filename, 'r') as zip_ref:
-                    zip_ref.extractall(TARGET_PATH)
+            # Unzip archives
+            with zipfile.ZipFile(full_filename, 'r') as zip_ref:
+                zip_ref.extractall(TARGET_PATH)
 
         print('Prepare dataset... ', directory_name)
         img_dir_path = './' + directory_name + '/images/'
