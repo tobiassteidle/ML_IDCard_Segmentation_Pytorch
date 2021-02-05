@@ -18,7 +18,7 @@ import models
 from utils.metrics import multi_acc, iou_score
 
 NO_OF_EPOCHS = 500
-BATCH_SIZE = 8
+BATCH_SIZE = 32
 IMAGE_SIZE = (256, 256)
 
 SEED = 230
@@ -42,7 +42,7 @@ class SegmentationImageDataset(Dataset):
         _, _, self.filenames = next(walk(image_dir))
 
     @classmethod
-    def preprocess(cls, pil_img):
+    def preprocess(cls, pil_img, normalize=True):
         pil_img = pil_img.convert('L')
 
         pil_img = pil_img.resize(IMAGE_SIZE)
@@ -53,7 +53,8 @@ class SegmentationImageDataset(Dataset):
 
         # HWC to CHW
         img_trans = img_nd.transpose((2, 0, 1))
-        if img_trans.max() > 1:
+
+        if normalize:
             img_trans = img_trans / 255
 
         return img_trans
@@ -104,6 +105,7 @@ def train(model, data_loader, criterion, optimizer, scheduler, num_epochs=5):
                 model.eval()
 
             # keep track of training and validation loss
+            batch_nums = 0
             running_loss = 0.0
             running_iou = 0.0
             running_corrects = 0.0
@@ -117,7 +119,7 @@ def train(model, data_loader, criterion, optimizer, scheduler, num_epochs=5):
                     output = model(data)
 
                     # calculate the loss
-                    loss = criterion(output, labels.to(torch.float32))
+                    loss = criterion(output, labels)
 
                     if phase == 'train':
                         # backward pass: compute gradient of the loss with respect to model parameters
@@ -129,21 +131,23 @@ def train(model, data_loader, criterion, optimizer, scheduler, num_epochs=5):
                         optimizer.zero_grad()
 
                 # statistics
-                running_loss += loss.item() * data.size(0)
-                running_iou = iou_score(output, labels)
-                running_corrects = multi_acc(output, labels)
+                batch_nums += 1
+                running_loss += loss.item()
+                running_iou += iou_score(output, labels)
+                running_corrects += multi_acc(output, labels)
 
             if phase == 'train':
                 scheduler.step(running_iou)
 
             # epoch statistics
-            epoch_loss = running_loss / len(data_loader[phase].dataset)
-            epoch_iou = running_iou / len(data_loader[phase].dataset)
-            epoch_acc = running_corrects / len(data_loader[phase].dataset)
+            epoch_loss = running_loss / batch_nums
+            epoch_iou = running_iou / batch_nums
+            epoch_acc = running_corrects / batch_nums
 
             result.append('{} Loss: {:.4f} Acc: {:.4f} IoU: {:.4f}'.format(phase, epoch_loss, epoch_acc, epoch_iou))
 
             tb_writer.add_scalar('Loss/' + phase, epoch_loss, epoch)
+            tb_writer.add_scalar('IoU/' + phase, epoch_iou, epoch)
             tb_writer.add_scalar('Accuracy/' + phase, epoch_acc, epoch)
 
             if phase == 'val' and epoch_loss < best_loss:
@@ -151,7 +155,6 @@ def train(model, data_loader, criterion, optimizer, scheduler, num_epochs=5):
                 best_loss = epoch_loss
                 saveCheckpoint(CHECKPOINT_PATH, epoch, model, optimizer, BATCH_SIZE)
                 print('Checkpoint saved - Loss: {:.4f} Acc: {:.4f} IoU: {:.4f}'.format(epoch_loss, epoch_acc, epoch_iou))
-
 
         print(result)
 
@@ -179,7 +182,7 @@ def main():
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer = Adam(model.parameters(), lr=1e-4)
-    scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.2, patience=3)
+    scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.2, patience=3, verbose=True)
 
     print('Start training...')
     train(model, dataloader, criterion, optimizer, scheduler, num_epochs=NO_OF_EPOCHS)
