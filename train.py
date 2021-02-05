@@ -93,6 +93,7 @@ def train(model, data_loader, criterion, optimizer, scheduler, num_epochs=5):
 
     best_acc = 0.0
     best_loss = sys.float_info.max
+    best_iou = 0.0
 
     for epoch in range(num_epochs):
         result = []
@@ -150,9 +151,10 @@ def train(model, data_loader, criterion, optimizer, scheduler, num_epochs=5):
             tb_writer.add_scalar('IoU/' + phase, epoch_iou, epoch)
             tb_writer.add_scalar('Accuracy/' + phase, epoch_acc, epoch)
 
-            if phase == 'val' and epoch_loss < best_loss:
+            if phase == 'val' and epoch_iou > best_iou:
                 best_acc = epoch_acc
                 best_loss = epoch_loss
+                best_iou = epoch_iou
                 saveCheckpoint(CHECKPOINT_PATH, epoch, model, optimizer, BATCH_SIZE)
                 print('Checkpoint saved - Loss: {:.4f} Acc: {:.4f} IoU: {:.4f}'.format(epoch_loss, epoch_acc, epoch_iou))
 

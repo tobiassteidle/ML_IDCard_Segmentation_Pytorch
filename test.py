@@ -38,8 +38,7 @@ def load_image():
 
     # HWC to CHW
     img_trans = img_nd.transpose((2, 0, 1))
-    if img_trans.max() > 1:
-        img_trans = img_trans / 255
+    img_trans = img_trans / 255
 
     img_trans = img_trans.reshape(1, 1, 256, 256)
 
@@ -49,6 +48,11 @@ def load_image():
 def predict_image(model, image):
     with torch.no_grad():
         output = model(image.to(device))
+
+    output = output.detach().cpu().numpy()[0]
+    output = output.transpose((1, 2, 0))
+    output = np.uint8(output)
+    _, output = cv2.threshold(output, 127, 255, cv2.THRESH_BINARY_INV)
 
     return output
 
@@ -61,7 +65,7 @@ def main():
 
         else:
             print('Load model... ', MODEL_FILE)
-            model = models.UNet(n_channels=1, n_classes=1, bilinear=False)
+            model = models.UNet(n_channels=1, n_classes=1)
 
             checkpoint = torch.load(pathlib.Path(MODEL_FILE))
             model.load_state_dict(checkpoint['model_state_dict'])
@@ -74,18 +78,15 @@ def main():
             print('Prediction...')
             output_image = predict_image(model, img)
 
-            print(output_image)
-
             print('Cut it out...')
             mask_image = cv2.resize(output_image, (w, h))
             warped = image.convert_object(mask_image, cv2.imread(INPUT_FILE))
 
             print('Save output files...', OUTPUT_FILE)
-            plt.imsave(OUTPUT_MASK, mask_image, cmap='gray')
-            plt.imsave(OUTPUT_FILE, warped)
+            cv2.imwrite(OUTPUT_MASK, mask_image)
+            cv2.imwrite(OUTPUT_FILE, warped)
 
             print('Done.')
-
 
 if __name__ == '__main__':
     main()
