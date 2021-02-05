@@ -9,12 +9,12 @@ However, this is not yet planned in the scope of this project.
 
 ## Additional Information
 Dataset: [MIDV-500](https://arxiv.org/abs/1807.05786)   
-Tensorflow Version: GPU 1.5.0
+Pytorch Version: 1.7.1 CUDA 11.2
 
 ## Installation
 1. Create and activate a new environment.
 ```
-conda create -n idcard python=3.6
+conda create -n idcard python=3.9.1
 source activate idcard
 ```
 2. Install Dependencies.
@@ -41,7 +41,7 @@ jupyter notebook "IDCard Prediction Test.ipynb"
 
 ### Test the trained model
 ```
-python test.py test/sample1.png --output_mask=test/output_mask.png --output_prediction=test/output_pred.png --model=model.h5
+python test.py test/sample1.png --output_mask=test/output_mask.png --output_prediction=test/output_pred.png --model=./pretrained/model_checkpoint.pt
 ```
 
 Call `python test.py --help` for possible arguments. 
