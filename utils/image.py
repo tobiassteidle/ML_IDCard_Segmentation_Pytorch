@@ -1,7 +1,8 @@
-#https://github.com/KMKnation/Four-Point-Invoice-Transform-with-OpenCV/blob/master/four_point_object_extractor.py
+# https://github.com/KMKnation/Four-Point-Invoice-Transform-with-OpenCV/blob/master/four_point_object_extractor.py
 
 import cv2
 import numpy as np
+
 
 def order_points(pts):
     rect = np.zeros((4, 2), dtype="float32")
@@ -37,61 +38,3 @@ def four_point_transform(image, pts):
     M = cv2.getPerspectiveTransform(rect, dst)
     warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
     return warped
-
-
-def findLargestCountours(cntList, cntWidths):
-    newCntList = []
-    newCntWidths = []
-
-    first_largest_cnt_pos = cntWidths.index(max(cntWidths))
-
-    newCntList.append(cntList[first_largest_cnt_pos])
-    newCntWidths.append(cntWidths[first_largest_cnt_pos])
-
-    cntList.pop(first_largest_cnt_pos)
-    cntWidths.pop(first_largest_cnt_pos)
-
-    seccond_largest_cnt_pos = cntWidths.index(max(cntWidths))
-
-    newCntList.append(cntList[seccond_largest_cnt_pos])
-    newCntWidths.append(cntWidths[seccond_largest_cnt_pos])
-
-    cntList.pop(seccond_largest_cnt_pos)
-    cntWidths.pop(seccond_largest_cnt_pos)
-    return newCntList, newCntWidths
-
-
-def convert_object(mask, image):
-    gray = mask
-    gray = cv2.bilateralFilter(gray, 11, 17, 17)
-    gray = cv2.medianBlur(gray, 5)
-    edged = cv2.Canny(gray, 30, 400)
-    countours, _ = cv2.findContours(edged, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-
-    cnts = sorted(countours, key=cv2.contourArea, reverse=True)
-    screenCntList = []
-    scrWidths = []
-    for cnt in cnts:
-        peri = cv2.arcLength(cnt, True)
-        approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
-        screenCnt = approx
-
-        if (len(screenCnt) == 4):
-            (X, Y, W, H) = cv2.boundingRect(cnt)
-            screenCntList.append(screenCnt)
-            scrWidths.append(W)
-
-    if len(scrWidths) != 2:
-        print('ID Card not found.')
-        return None
-    else:
-        screenCntList, scrWidths = findLargestCountours(screenCntList, scrWidths)
-
-        if not len(screenCntList) >= 2:  # there is no rectangle found
-            return None
-        elif scrWidths[0] != scrWidths[1]:  # mismatch in rect
-            return None
-
-        pts = screenCntList[0].reshape(4, 2)
-        warped = four_point_transform(image, pts)
-        return warped
