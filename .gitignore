@@ -111,11 +111,13 @@ backup/
 .idea
 
 weights/
+pretrained/model_checkpoint.pt
 
 dataset/data
 dataset/temp
 dataset/train
 
 test/output*.png
+test/sample_real*.png
 
 *.h5
