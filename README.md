@@ -1,4 +1,4 @@
-# ML_IDCard_Segmentation
+# ML_IDCard_Segmentation (Pytorch) - WIP
 Machine Learning Project to identify an ID Card on an image.  
 
 ### Objectives
@@ -10,6 +10,8 @@ However, this is not yet planned in the scope of this project.
 ## Additional Information
 Dataset: [MIDV-500](https://arxiv.org/abs/1807.05786)   
 Pytorch Version: 1.7.1 CUDA 11.2
+
+Trained on a NVIDIA GeForce RTX 3090
 
 ## Installation
 1. Create and activate a new environment.
@@ -31,17 +33,12 @@ python prepare_dataset.py
 
 ### Training of the neural network
 ```
-python train.py
-```
-
-### Show Jupyter Notebook for Test
-```
-jupyter notebook "IDCard Prediction Test.ipynb"
+python train.py --resumeTraining=True
 ```
 
 ### Test the trained model
 ```
-python test.py test/sample1.png --output_mask=test/output_mask.png --output_prediction=test/output_pred.png --model=./pretrained/model_checkpoint.pt
+python test.py test/sample1.png --output_mask=test/output_mask.png --output_prediction=test/output_pred.png --model=./pretrained/model_final.pt
 ```
 
 Call `python test.py --help` for possible arguments. 
@@ -74,9 +71,6 @@ Example:
 ![IoU](assets/iou.png "IoU")
 
 ## Results for validation set (only trained on german id cards)
-Accuracy:  
-99.87%
-
 Intersection over Unit:  
 0.9939
 
