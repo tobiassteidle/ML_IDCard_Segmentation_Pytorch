@@ -70,7 +70,7 @@ The closer the Jaccard coefficient is to 1, the greater the similarity of the qu
 Example:  
 ![IoU](assets/iou.png "IoU")
 
-## Results for validation set (only trained on german id cards)
+## Results for validation set (only trained on german id cards - Overall Model current in training)
 Intersection over Unit:  
 0.9939
 
