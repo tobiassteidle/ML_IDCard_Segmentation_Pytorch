@@ -38,3 +38,30 @@ def four_point_transform(image, pts):
     M = cv2.getPerspectiveTransform(rect, dst)
     warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
     return warped
+
+
+def findContours(image, thickness=3):
+    contours, hierarchy = cv2.findContours(image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contour_image = np.zeros_like(image)
+    cv2.drawContours(contour_image, contours, -1, 255, thickness)
+    return contour_image, contours, hierarchy
+
+
+def extract_idcard(raw_image, mask_image):
+    contour_image, contours, hierarchy = findContours(mask_image)
+
+    cnts = sorted(contours, key=cv2.contourArea, reverse=True)
+    screenCntList = []
+    for cnt in cnts:
+        peri = cv2.arcLength(cnt, True)
+        approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+        screenCnt = approx
+
+        if (len(screenCnt) == 4):
+            screenCntList.append(screenCnt)
+
+    assert len(screenCntList) == 1
+    new_points = np.array([[points[0][0],points[0][1]] for points in screenCntList[0]])
+
+    warped = four_point_transform(raw_image, new_points)
+    return cv2.cvtColor(warped, cv2.COLOR_BGR2RGB)

@@ -83,7 +83,7 @@ def main():
             cv2.imwrite(OUTPUT_MASK, mask_image)
 
             print('Cut it out...')
-            warped = image.convert_object(mask_image, cv2.imread(INPUT_FILE))
+            warped = image.extract_idcard(cv2.imread(INPUT_FILE), mask_image)
             cv2.imwrite(OUTPUT_FILE, warped)
 
             print('Done.')
