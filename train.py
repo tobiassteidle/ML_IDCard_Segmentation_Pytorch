@@ -2,6 +2,7 @@ import sys
 import os
 import numpy as np
 import time
+import argparse
 import random
 from os import walk
 import pathlib
@@ -24,8 +25,16 @@ IMAGE_SIZE = (256, 256)
 SEED = 230
 
 CHECKPOINT_PATH = pathlib.Path("./pretrained/model_checkpoint.pt")
+FINAL_PATH = pathlib.Path("./pretrained/model_final.pt")
+
+parser = argparse.ArgumentParser(description='Training Semantic segmentation of IDCard in Image.')
+parser.add_argument('--resumeTraining', type=bool, default=False, help='Resume Training')
+
+args = parser.parse_args()
+RESUME_TRAINING = args.resumeTraining
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 def seed_torch(seed=SEED):
     random.seed(seed)
@@ -33,7 +42,8 @@ def seed_torch(seed=SEED):
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
-    #torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.deterministic = True
+
 
 class SegmentationImageDataset(Dataset):
     def __init__(self, image_dir, mask_dir):
@@ -74,6 +84,7 @@ class SegmentationImageDataset(Dataset):
     def __len__(self):
         return len(self.filenames)
 
+
 def saveCheckpoint(filename, epoch, model, optimizer, batchsize):
     checkpoint = {
         'epoch': epoch,
@@ -83,9 +94,10 @@ def saveCheckpoint(filename, epoch, model, optimizer, batchsize):
     }
 
     # save all important stuff
-    torch.save(checkpoint , filename)
+    torch.save(checkpoint, filename)
 
-def train(model, data_loader, criterion, optimizer, scheduler, num_epochs=5):
+
+def train(model, data_loader, criterion, optimizer, scheduler, num_epochs=5, epochs_earlystopping=10):
     logdir = './logs/' + time.strftime("%Y%m%d_%H%M%S")
     logdir = os.path.join(logdir)
     pathlib.Path(logdir).mkdir(parents=True, exist_ok=True)
@@ -95,8 +107,11 @@ def train(model, data_loader, criterion, optimizer, scheduler, num_epochs=5):
     best_loss = sys.float_info.max
     best_iou = 0.0
 
+    early_stopping = epochs_earlystopping
+
     for epoch in range(num_epochs):
         result = []
+        early_stopping += 1
 
         for phase in ['train', 'val']:
             if phase == 'train':  # put the model in training mode
@@ -152,17 +167,24 @@ def train(model, data_loader, criterion, optimizer, scheduler, num_epochs=5):
             tb_writer.add_scalar('Accuracy/' + phase, epoch_acc, epoch)
 
             if phase == 'val' and epoch_iou > best_iou:
+                early_stopping = 0
+
                 best_acc = epoch_acc
                 best_loss = epoch_loss
                 best_iou = epoch_iou
                 saveCheckpoint(CHECKPOINT_PATH, epoch, model, optimizer, BATCH_SIZE)
-                print('Checkpoint saved - Loss: {:.4f} Acc: {:.4f} IoU: {:.4f}'.format(epoch_loss, epoch_acc, epoch_iou))
+                print(
+                    'Checkpoint saved - Loss: {:.4f} Acc: {:.4f} IoU: {:.4f}'.format(epoch_loss, epoch_acc, epoch_iou))
 
         print(result)
+
+        if early_stopping == 10:
+            break
 
     print('-----------------------------------------')
     print('Final Result: Loss: {:.4f} Acc: {:.4f}'.format(best_loss, best_acc))
     print('-----------------------------------------')
+
 
 def main():
     seed_torch()
@@ -176,7 +198,7 @@ def main():
     validation_dataloader = DataLoader(validation_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
 
     dataloader = {"train": train_dataloader,
-                  "val":  validation_dataloader}
+                  "val": validation_dataloader}
 
     print('Initialize model...')
     model = models.UNet(n_channels=1, n_classes=1)
@@ -186,8 +208,20 @@ def main():
     optimizer = Adam(model.parameters(), lr=1e-4)
     scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.2, patience=3, verbose=True)
 
+    print(RESUME_TRAINING)
+    if RESUME_TRAINING:
+        print('Load Model to resume training...')
+        checkpoint = torch.load(CHECKPOINT_PATH)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        model.to(device)
+        model.eval()
+
     print('Start training...')
     train(model, dataloader, criterion, optimizer, scheduler, num_epochs=NO_OF_EPOCHS)
+
+    print('Save final model...')
+    torch.save(model.state_dict(), FINAL_PATH)
+
 
 if __name__ == '__main__':
     main()
