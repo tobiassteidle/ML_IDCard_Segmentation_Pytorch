@@ -3,7 +3,11 @@ numpy==1.16.4
 pandas
 wget==3.0
 opencv-python
+opencv-contrib-python
 pillow
+pytesseract
+tesseract
+wget==3.0
 imutils
 scikit-image
 librosa
@@ -11,8 +15,13 @@ seaborn
 tqdm
 xgboost
 PyWavelets
-tensorflow-gpu==1.15.2
-Keras==2.2.4
+torch==1.7.1+cu110
+torchaudio==0.7.2
+torchsummary==1.5.1
+torchvision==0.8.2+cu110
+scikit-image==0.18.1
+scikit-learn==0.24.1
+scikit-plot==0.3.7
 h5py
 ipykernel
 jupyter
