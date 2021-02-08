@@ -4,8 +4,6 @@ Machine Learning Project to identify an ID Card on an image.
 ### Objectives
 The goal of this project is to recognize a ID Card on a photo, cut it out using semantic segmentation and to 
 transform the perspective so that you get a frontal view of the ID Card.
-Optionally an OCR text recognition can be done in a later step.
-However, this is not yet planned in the scope of this project.
 
 ## Additional Information
 Dataset: [MIDV-500](https://arxiv.org/abs/1807.05786)   
@@ -35,6 +33,7 @@ python prepare_dataset.py
 ```
 python train.py --resumeTraining=True
 ```
+`resumeTraining` is optional an resumes training on an existing `./pretrained/model_checkpoint.pt`
 
 ### Test the trained model
 ```
