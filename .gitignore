@@ -118,6 +118,6 @@ dataset/temp
 dataset/train
 
 test/output*.png
-test/sample_real*.png
+test/sample_real*.*
 
 *.h5

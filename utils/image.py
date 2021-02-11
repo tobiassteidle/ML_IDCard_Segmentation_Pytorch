@@ -2,6 +2,37 @@
 
 import cv2
 import numpy as np
+from PIL import Image
+import torch
+
+
+def load_image(input_file):
+    source_img = Image.open(input_file).convert('L')
+
+    # start with an quadratic image
+    offset = 20
+    size = np.max([source_img.size, source_img.size])
+    image = Image.new('L', (size + offset, size + offset))
+    image.paste(source_img, (offset // 2, offset // 2))
+
+    width, height = image.size
+
+    # resize for inference
+    image = image.resize((256, 256))
+    img_nd = np.array(image)
+
+    # expand grayscale image to 3 dimensions
+    if len(img_nd.shape) == 2:
+        img_nd = np.expand_dims(img_nd, axis=2)
+
+    # HWC to CHW
+    img_trans = img_nd.transpose((2, 0, 1))
+    img_trans = img_trans / 255
+
+    # reshape to 1-batched tensor
+    img_trans = img_trans.reshape(1, 1, 256, 256)
+
+    return torch.from_numpy(img_trans).type(torch.FloatTensor), height, width
 
 
 def order_points(pts):
@@ -40,7 +71,7 @@ def four_point_transform(image, pts):
     return warped
 
 
-def findContours(image, thickness=3):
+def find_contours(image, thickness=3):
     contours, hierarchy = cv2.findContours(image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     contour_image = np.zeros_like(image)
     cv2.drawContours(contour_image, contours, -1, 255, thickness)
@@ -48,7 +79,7 @@ def findContours(image, thickness=3):
 
 
 def extract_idcard(raw_image, mask_image):
-    contour_image, contours, hierarchy = findContours(mask_image)
+    contour_image, contours, hierarchy = find_contours(mask_image)
 
     cnts = sorted(contours, key=cv2.contourArea, reverse=True)
     screenCntList = []
@@ -61,7 +92,7 @@ def extract_idcard(raw_image, mask_image):
             screenCntList.append(screenCnt)
 
     assert len(screenCntList) == 1
-    new_points = np.array([[points[0][0],points[0][1]] for points in screenCntList[0]])
+    new_points = np.array([[points[0][0], points[0][1]] for points in screenCntList[0]])
 
     warped = four_point_transform(raw_image, new_points)
     return cv2.cvtColor(warped, cv2.COLOR_BGR2RGB)
